@@ -16,39 +16,40 @@ void addProcess() { nodeType[nodeCount++] = PROCESS; }
 void addResource() { nodeType[nodeCount++] = RESOURCE; }
 void addEdge(int a, int b) { graph[a][b] = 1; }
 
-bool dfs(int node) {
-    visited[node] = true;
-    recStack[node] = true;
-
-    for (int next = 0; next < nodeCount; next++) {
-        if (graph[node][next] == 1) {
-            if (!visited[next] && dfs(next)) return true;
-            if (recStack[next]) return true;
-        }
-    }
-
-    recStack[node] = false;
-    return false;
+// NEW HELPER FUNCTION
+void getNodeName(int id, char *buffer) {
+    if (nodeType[id] == PROCESS)
+        sprintf(buffer, "P%d", id);
+    else
+        sprintf(buffer, "R%d", id);
 }
 
-void detectDeadlock() {
-    for (int i = 0; i < nodeCount; i++)
-        visited[i] = recStack[i] = false;
+void displayGraph() {
+    char nameA[10], nameB[10];
 
-    for (int i = 0; i < nodeCount; i++)
-        if (!visited[i] && dfs(i)) {
-            printf("Deadlock detected!\n");
-            return;
+    printf("\n===== RAG =====\n");
+
+    for (int i = 0; i < nodeCount; i++) {
+        getNodeName(i, nameA);
+        printf("%s: ", nameA);
+
+        for (int j = 0; j < nodeCount; j++) {
+            if (graph[i][j] == 1) {
+                getNodeName(j, nameB);
+                printf("-> %s ", nameB);
+            }
         }
+        printf("\n");
+    }
 
-    printf("No deadlock.\n");
+    printf("================\n");
 }
 
 int main() {
     addProcess();
     addResource();
     addEdge(0, 1);
-    addEdge(1, 0);
-    detectDeadlock();
+
+    displayGraph();
     return 0;
 }
