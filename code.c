@@ -9,34 +9,46 @@ int graph[MAX_NODES][MAX_NODES];
 int nodeType[MAX_NODES];
 int nodeCount = 0;
 
+bool visited[MAX_NODES];
+bool recStack[MAX_NODES];
+
 void addProcess() { nodeType[nodeCount++] = PROCESS; }
 void addResource() { nodeType[nodeCount++] = RESOURCE; }
 void addEdge(int a, int b) { graph[a][b] = 1; }
 
-void displayGraph() {
-    printf("\n===== RAG =====\n");
+bool dfs(int node) {
+    visited[node] = true;
+    recStack[node] = true;
 
-    for (int i = 0; i < nodeCount; i++) {
-
-        if (nodeType[i] == PROCESS) printf("P%d: ", i);
-        else printf("R%d: ", i);
-
-        for (int j = 0; j < nodeCount; j++) {
-            if (graph[i][j] == 1) {
-                if (nodeType[j] == PROCESS) printf("-> P%d ", j);
-                else printf("-> R%d ", j);
-            }
+    for (int next = 0; next < nodeCount; next++) {
+        if (graph[node][next] == 1) {
+            if (!visited[next] && dfs(next)) return true;
+            if (recStack[next]) return true;
         }
-        printf("\n");
     }
 
-    printf("================\n");
+    recStack[node] = false;
+    return false;
+}
+
+void detectDeadlock() {
+    for (int i = 0; i < nodeCount; i++)
+        visited[i] = recStack[i] = false;
+
+    for (int i = 0; i < nodeCount; i++)
+        if (!visited[i] && dfs(i)) {
+            printf("Deadlock detected!\n");
+            return;
+        }
+
+    printf("No deadlock.\n");
 }
 
 int main() {
     addProcess();
     addResource();
     addEdge(0, 1);
-    displayGraph();
+    addEdge(1, 0);
+    detectDeadlock();
     return 0;
 }
